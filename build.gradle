@@ -1,8 +1,9 @@
 plugins {
+	id 'org.springframework.boot' version '3.3.4'
+	id 'io.spring.dependency-management' version '1.1.5'
 	id 'java'
-	id 'org.springframework.boot' version '3.5.6'
-	id 'io.spring.dependency-management' version '1.1.7'
 }
+
 
 group = 'com.unifor.br'
 version = '0.0.1-SNAPSHOT'
@@ -10,7 +11,7 @@ description = 'Leakwatch API RESTful'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

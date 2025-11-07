@@ -1,60 +1,50 @@
 package com.unifor.br.leakwatch.controller;
 
-import com.unifor.br.leakwatch.repository.sensorRepository;
-import com.unifor.br.leakwatch.model.sensor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import com.unifor.br.leakwatch.model.Sensor;
+import com.unifor.br.leakwatch.repository.ReportRepository;
+import com.unifor.br.leakwatch.repository.SensorRepository;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import java.util.List;
+@RestController
+@RequestMapping("/api/sensores")
+@CrossOrigin(origins = "*")
+public class SensorController {
 
-@RestController // Indica que é um Controller REST
-@RequestMapping("/api/sensor") // URL base para todos os endpoints
-public class sensorController {
+    private final SensorRepository sensorRepository;
+    private final ReportRepository reportRepository;
 
-    @Autowired
-    private sensorRepository repository;
+    public SensorController(SensorRepository sensorRepository, ReportRepository reportRepository) {
+        this.sensorRepository = sensorRepository;
+        this.reportRepository = reportRepository;
+    }
 
-    // --- GET (Read) ---
     @GetMapping
-    public List<sensor> listarTodos() {
-        return repository.findAll();
-    }
+    public Map<String, Object> getSensoresData() {
+        Map<String, Object> response = new HashMap<>();
+        List<Sensor> sensores = sensorRepository.findAll();
 
-    @GetMapping("/{id}")
-    public ResponseEntity<sensor> buscarPorId(@PathVariable Long id) {
-        return repository.findById(id)
-                .map(ResponseEntity::ok) // Se encontrar, retorna 200 OK com o objeto
-                .orElse(ResponseEntity.notFound().build()); // Se não, retorna 404 Not Found
-    }
-
-    // --- POST (Create) ---
-    @PostMapping
-    // Retorna o produto criado e o código 201 Created
-    public sensor criarSensor(@RequestBody sensor sensor) {
-        return repository.save(sensor);
-    }
-
-    // --- DELETE (Delete) ---
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarSensor(@PathVariable Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.noContent().build(); // 204 No Content
-        }
-        return ResponseEntity.notFound().build(); // 404 Not Found
-    }
-
-    // --- PUT (Update) ---
-    @PutMapping("/{id}")
-    public ResponseEntity<sensor> atualizarsensor(@PathVariable Long id, @RequestBody sensor novosensor) {
-        return repository.findById(id)
-                .map(sensorExistente -> {
-                    sensorExistente.setSensorName(novosensor.getSensorName());
-                    sensorExistente.setSensorType(novosensor.getSensorType());
-                    sensor atualizado = repository.save(sensorExistente);
-                    return ResponseEntity.ok(atualizado);
+        Set<String> horas = new TreeSet<>();
+        sensores.forEach(sensor ->
+            reportRepository.findBySensorIdOrderByReportTimeAsc(sensor.getId())
+                .forEach(r -> {
+                    if (r.getReportTime() != null)
+                        horas.add(r.getReportTime().getHour() + "h");
                 })
-                .orElse(ResponseEntity.notFound().build());
+        );
+
+        response.put("horas", horas);
+
+        List<Map<String, Object>> sensoresData = sensores.stream().map(sensor -> {
+            var reports = reportRepository.findBySensorIdOrderByReportTimeAsc(sensor.getId());
+            Map<String, Object> s = new HashMap<>();
+            s.put("nome", sensor.getSensorName());
+            s.put("valores", reports.stream().map(r -> r.getGasLevel()).collect(Collectors.toList()));
+            return s;
+        }).collect(Collectors.toList());
+
+        response.put("sensores", sensoresData);
+        return response;
     }
 }

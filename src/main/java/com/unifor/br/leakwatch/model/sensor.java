@@ -1,24 +1,23 @@
-// Exemplo: src/main/java/com/exemplo/api/model/Sensor.java
 package com.unifor.br.leakwatch.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data; // Importação necessária do Lombok
-import lombok.NoArgsConstructor; // Opcional, mas útil
-import lombok.AllArgsConstructor; // Opcional, mas útil
+import jakarta.persistence.*;
+import lombok.*;
 
-@Entity // Indica que é uma entidade JPA (tabela no banco)
-@Data // Essa anotação gera Getters, Setters, toString, equals e hashCode
-@NoArgsConstructor // Opcional: Gera um construtor sem argumentos
-public class sensor {
-    @Id // Chave primária
+@Entity
+@Table(name = "sensor")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Sensor {
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String serial;
-    private String sensorName; // Ajuste para o padrão CamelCase do Java
-    private String sensorType;
+    @Column(name = "sensor_name", nullable = false)
+    private String sensorName;
 
+    @Column(name = "sensor_type", nullable = false)
+    private String sensorType;
 }

@@ -1,9 +1,6 @@
 package com.unifor.br.leakwatch.repository;
 
-import com.unifor.br.leakwatch.model.sensor;
+import com.unifor.br.leakwatch.model.Sensor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-
-public interface sensorRepository extends JpaRepository<sensor, Long> {
-
-}
+public interface SensorRepository extends JpaRepository<Sensor, Long> { }

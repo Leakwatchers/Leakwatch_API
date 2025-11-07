@@ -1,7 +1,7 @@
 package com.unifor.br.leakwatch.controller;
 
-import com.unifor.br.leakwatch.model.usuario;
-import com.unifor.br.leakwatch.repository.usuarioRepository;
+import com.unifor.br.leakwatch.model.Usuario;
+import com.unifor.br.leakwatch.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +15,13 @@ import java.util.List;
 public class usuarioController {
 
     @Autowired
-    private usuarioRepository repository;
+    private UsuarioRepository repository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping
-    public ResponseEntity<usuario> criarUsuario(@RequestBody usuario novoUsuario) {
+    public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario novoUsuario) {
 
         // 1. Criptografa a senha recebida
         String senhaCriptografada = passwordEncoder.encode(novoUsuario.getSenha());
@@ -30,7 +30,7 @@ public class usuarioController {
         novoUsuario.setSenha(senhaCriptografada);
 
         // 3. Salva a entidade no banco
-        usuario usuarioSalvo = repository.save(novoUsuario);
+        Usuario usuarioSalvo = repository.save(novoUsuario);
 
         // Retorna o objeto salvo (que agora tem a senha criptografada)
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
@@ -38,7 +38,7 @@ public class usuarioController {
 
     // Método para LISTAR (apenas para teste)
     @GetMapping
-    public List<usuario> listarTodos() {
+    public List<Usuario> listarTodos() {
         return repository.findAll();
     }
 
