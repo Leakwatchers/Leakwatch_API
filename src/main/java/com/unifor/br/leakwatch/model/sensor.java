@@ -19,5 +19,5 @@ public class Sensor {
     private String sensorName;
 
     @Column(name = "sensor_type", nullable = false)
-    private String sensorType;
+    private String sensorType = "G";
 }

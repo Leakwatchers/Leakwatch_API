@@ -20,6 +20,7 @@ public class SensorController {
         this.reportRepository = reportRepository;
     }
 
+    // --- EXISTENTE: usado pelos gráficos ---
     @GetMapping
     public Map<String, Object> getSensoresData() {
         Map<String, Object> response = new HashMap<>();
@@ -27,11 +28,11 @@ public class SensorController {
 
         Set<String> horas = new TreeSet<>();
         sensores.forEach(sensor ->
-            reportRepository.findBySensorIdOrderByReportTimeAsc(sensor.getId())
-                .forEach(r -> {
-                    if (r.getReportTime() != null)
-                        horas.add(r.getReportTime().getHour() + "h");
-                })
+                reportRepository.findBySensorIdOrderByReportTimeAsc(sensor.getId())
+                        .forEach(r -> {
+                            if (r.getReportTime() != null)
+                                horas.add(r.getReportTime().getHour() + "h");
+                        })
         );
 
         response.put("horas", horas);
@@ -46,5 +47,17 @@ public class SensorController {
 
         response.put("sensores", sensoresData);
         return response;
+    }
+
+    // --- NOVO: listar sensores simples ---
+    @GetMapping("/listar")
+    public List<Sensor> listarSensores() {
+        return sensorRepository.findAll();
+    }
+
+    // --- NOVO: cadastrar sensor ---
+    @PostMapping
+    public Sensor cadastrarSensor(@RequestBody Sensor sensor) {
+        return sensorRepository.save(sensor);
     }
 }
