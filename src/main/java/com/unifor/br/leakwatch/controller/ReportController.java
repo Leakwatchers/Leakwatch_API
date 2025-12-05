@@ -9,11 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-<<<<<<< HEAD
 @RequestMapping("/api/report")
-=======
-@RequestMapping("/api/report" )
->>>>>>> 4315d37 (Ping Pong)
 public class ReportController {
 
     @Autowired
@@ -25,17 +21,10 @@ public class ReportController {
         return repository.findAll();
     }
 
-    // --- GET: relatórios de um sensor específico ---
-<<<<<<< HEAD
-    @GetMapping("/sensor/{sensorId}")
-    public List<Report> listarPorSensor(@PathVariable Long sensorId) {
-        return repository.findBySensorId(sensorId);
-=======
-    // CORREÇÃO: Alterado para receber macAddress (String) e usar o novo método do repositório
+    // --- GET: relatórios por macAddress ---
     @GetMapping("/sensor/{macAddress}")
     public List<Report> listarPorSensor(@PathVariable String macAddress) {
         return repository.findByMacAddress(macAddress);
->>>>>>> 4315d37 (Ping Pong)
     }
 
     // --- POST: cria novo relatório ---
@@ -44,7 +33,7 @@ public class ReportController {
         return repository.save(report);
     }
 
-    // --- DELETE: remove um relatório ---
+    // --- DELETE: remove um relatório pelo ID ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (repository.existsById(id)) {
