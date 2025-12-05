@@ -2,7 +2,7 @@ package com.unifor.br.leakwatch.controller;
 
 import com.unifor.br.leakwatch.model.Role;
 import com.unifor.br.leakwatch.model.User;
-import com.unifor.br.leakwatch.service.UserService;
+import com.unifor.br.leakwatch.services.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 

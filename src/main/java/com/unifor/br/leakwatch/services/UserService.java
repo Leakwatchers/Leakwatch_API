@@ -1,4 +1,4 @@
-package com.unifor.br.leakwatch.service;
+package com.unifor.br.leakwatch.services;
 
 import com.unifor.br.leakwatch.model.Role;
 import com.unifor.br.leakwatch.model.User;
@@ -19,31 +19,25 @@ public class UserService {
         this.encoder = encoder;
     }
 
-    public User createUser(String username, String password, Role role) {
-
-        // 🚨 Impede duplicação
-        if (repo.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Usuário já existe: " + username);
-        }
+    // Criar usuário (MASTER)
+    public User createUser(String username, String rawPassword, Role role) {
 
         User u = new User();
         u.setUsername(username);
-        u.setPasswordHash(encoder.encode(password));
+        u.setPasswordHash(encoder.encode(rawPassword));  // <-- SENHA CORRETA!
         u.setRole(role);
         u.setActive(true);
 
         return repo.save(u);
     }
 
+    // Listar todos (MASTER)
     public List<User> listAll() {
         return repo.findAll();
     }
 
+    // Remover usuário (MASTER)
     public void delete(Long id) {
         repo.deleteById(id);
-    }
-
-    public User findByUsername(String username) {
-        return repo.findByUsername(username).orElse(null);
     }
 }

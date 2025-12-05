@@ -1,7 +1,7 @@
 package com.unifor.br.leakwatch;
 
 import com.unifor.br.leakwatch.model.Role;
-import com.unifor.br.leakwatch.service.UserService;
+import com.unifor.br.leakwatch.services.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
