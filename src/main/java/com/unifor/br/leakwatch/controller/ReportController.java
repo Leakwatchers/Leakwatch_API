@@ -2,44 +2,40 @@ package com.unifor.br.leakwatch.controller;
 
 import com.unifor.br.leakwatch.model.Report;
 import com.unifor.br.leakwatch.repository.ReportRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/report")
+@RequestMapping("/api/reports")
+@CrossOrigin(origins = "*")
 public class ReportController {
 
-    @Autowired
-    private ReportRepository repository;
+    private final ReportRepository repo;
 
-    // --- GET: todos os relatórios ---
+    public ReportController(ReportRepository repo) {
+        this.repo = repo;
+    }
+
     @GetMapping
     public List<Report> listarTodos() {
-        return repository.findAll();
+        return repo.findAll();
     }
 
-    // --- GET: relatórios por macAddress ---
-    @GetMapping("/sensor/{macAddress}")
-    public List<Report> listarPorSensor(@PathVariable String macAddress) {
-        return repository.findByMacAddress(macAddress);
+    @GetMapping("/sensor/{mac}")
+    public List<Report> porSensor(@PathVariable String mac) {
+        return repo.findByMacAddressOrderByReportTimeDesc(mac);
     }
 
-    // --- POST: cria novo relatório ---
-    @PostMapping
-    public Report criar(@RequestBody Report report) {
-        return repository.save(report);
+    @GetMapping("/ultimo/{mac}")
+    public Report ultimo(@PathVariable String mac) {
+        return repo.findUltimoByMacAddress(mac);
     }
 
-    // --- DELETE: remove um relatório pelo ID ---
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @GetMapping("/alertas")
+    public List<Report> alertas() {
+        return repo.findAlertas();
     }
 }

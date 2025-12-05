@@ -2,7 +2,7 @@ package com.unifor.br.leakwatch.controller;
 
 import com.unifor.br.leakwatch.model.Sensor;
 import com.unifor.br.leakwatch.repository.ReportRepository;
-import com.unifor.br.leakwatch.repository.UsuarioRepository;
+import com.unifor.br.leakwatch.repository.UserRepository;
 import com.unifor.br.leakwatch.repository.SensorRepository;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;

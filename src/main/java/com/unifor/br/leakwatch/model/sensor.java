@@ -1,28 +1,67 @@
 package com.unifor.br.leakwatch.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sensor")
-@Data
 public class Sensor {
 
     @Id
-    @Column(name = "mac_address") // Mapeia para a coluna mac_address (VARCHAR(17) PRIMARY KEY)
+    @Column(name = "mac_address")
     private String macAddress;
 
-    @Column(name = "sensor_name") // Mapeia para a coluna sensor_name
+    @Column(name = "sensor_name")
     private String sensorName;
 
-    @Column(name = "sensor_type") // Mapeia para a coluna sensor_type
+    @Column(name = "sensor_type")
     private String sensorType;
 
-    @Column(name = "is_connected") // Mapeia para a nova coluna is_connected
-    private Boolean isConnected = false;
+    @Column(name = "is_connected")
+    private Boolean isConnected;
 
-    // Construtores, getters e setters (gerados pelo Lombok @Data)
+    @Column(name = "last_seen")
+    private LocalDateTime lastSeen;
+
+    // === GETTERS E SETTERS ===
+
+    public String getMacAddress() {
+        return macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
+    }
+
+    public String getSensorName() {
+        return sensorName;
+    }
+
+    public void setSensorName(String sensorName) {
+        this.sensorName = sensorName;
+    }
+
+    public String getSensorType() {
+        return sensorType;
+    }
+
+    public void setSensorType(String sensorType) {
+        this.sensorType = sensorType;
+    }
+
+    public Boolean getIsConnected() {
+        return isConnected;
+    }
+
+    public void setIsConnected(Boolean isConnected) {
+        this.isConnected = isConnected;
+    }
+
+    public LocalDateTime getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(LocalDateTime lastSeen) {
+        this.lastSeen = lastSeen;
+    }
 }

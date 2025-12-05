@@ -1,18 +1,10 @@
 package com.unifor.br.leakwatch.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "report")
-@Data
 public class Report {
 
     @Id
@@ -22,7 +14,6 @@ public class Report {
     @Column(name = "gas_level")
     private Double gasLevel;
 
-    // CORREÇÃO: Novo campo para mapear a chave estrangeira mac_address
     @Column(name = "mac_address")
     private String macAddress;
 
@@ -32,5 +23,16 @@ public class Report {
     @Column(name = "status")
     private String status;
 
-    // O campo sensor_id (antigo) foi removido.
+    public Long getId() { return id; }
+    public Double getGasLevel() { return gasLevel; }
+    public void setGasLevel(Double gasLevel) { this.gasLevel = gasLevel; }
+
+    public String getMacAddress() { return macAddress; }
+    public void setMacAddress(String macAddress) { this.macAddress = macAddress; }
+
+    public LocalDateTime getReportTime() { return reportTime; }
+    public void setReportTime(LocalDateTime reportTime) { this.reportTime = reportTime; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
