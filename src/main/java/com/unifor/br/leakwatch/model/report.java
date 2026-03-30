@@ -14,8 +14,8 @@ public class Report {
     @Column(name = "gas_level")
     private Double gasLevel;
 
-    @Column(name = "mac_address")
-    private String macAddress;
+    @Column(name = "ip_adress")
+    private String ipAdress;
 
     @Column(name = "report_time")
     private LocalDateTime reportTime;
@@ -27,8 +27,8 @@ public class Report {
     public Double getGasLevel() { return gasLevel; }
     public void setGasLevel(Double gasLevel) { this.gasLevel = gasLevel; }
 
-    public String getMacAddress() { return macAddress; }
-    public void setMacAddress(String macAddress) { this.macAddress = macAddress; }
+    public String getIpAdress() { return ipAdress; }
+    public void setMacAddress(String ipAdress) { this.ipAdress = ipAdress; }
 
     public LocalDateTime getReportTime() { return reportTime; }
     public void setReportTime(LocalDateTime reportTime) { this.reportTime = reportTime; }

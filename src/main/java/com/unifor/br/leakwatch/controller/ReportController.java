@@ -24,19 +24,19 @@ public class ReportController {
     ) {}
 
     private final ReportRepository repo;
-    private final SensorRepository sensorRepo;
+    private final SensorRepository sensorRepo;   // <-- injeta aqui
 
-    // INJETAR AMBOS
     public ReportController(ReportRepository repo, SensorRepository sensorRepo) {
         this.repo = repo;
         this.sensorRepo = sensorRepo;
     }
 
+    // LISTA TODOS COM NOME DO SENSOR CORRETAMENTE
     @GetMapping
     public List<ReportResp> listarTodos() {
         return repo.findAll().stream().map(r -> {
 
-            String sensorName = sensorRepo.findById(r.getMacAddress())
+            String name = sensorRepo.findById(r.getMacAddress())
                     .map(Sensor::getSensorName)
                     .orElse("Desconhecido");
 
@@ -44,7 +44,7 @@ public class ReportController {
                     r.getId(),
                     r.getGasLevel(),
                     r.getMacAddress(),
-                    sensorName,
+                    name,
                     r.getReportTime(),
                     r.getStatus()
             );

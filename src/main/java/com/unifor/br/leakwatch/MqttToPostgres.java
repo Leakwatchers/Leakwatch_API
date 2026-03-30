@@ -54,59 +54,54 @@ public class MqttToPostgres implements MqttCallback {
 
             mqttClient.connect(options);
 
-            System.out.println("✅ Conectado ao broker MQTT: " + MQTT_BROKER);
+            System.out.println("Conectado ao broker MQTT: " + MQTT_BROKER);
 
             mqttClient.subscribe(MQTT_STATUS_TOPIC);
-            System.out.println("📡 Aguardando mensagens MQTT no tópico: " + MQTT_STATUS_TOPIC);
+            System.out.println("Aguardando mensagens MQTT no tópico: " + MQTT_STATUS_TOPIC);
 
         } catch (MqttException e) {
-            System.err.println("❌ Falha ao conectar ou subscrever ao MQTT.");
+            System.err.println("Falha ao conectar ou subscrever ao MQTT.");
             e.printStackTrace();
         }
     }
 
-    public void sendCommand(String macAddress, String command) throws MqttException {
-        String topic = MQTT_COMMAND_TOPIC_BASE + macAddress;
+    public void sendCommand(String ipAdress, String command) throws MqttException {
+        String topic = MQTT_COMMAND_TOPIC_BASE + ipAdress;
         MqttMessage message = new MqttMessage(command.getBytes());
         message.setQos(1);
 
         mqttClient.publish(topic, message);
 
-        System.out.println("📤 Comando '" + command + "' enviado para o tópico: " + topic);
+        System.out.println("Comando '" + command + "' enviado para o tópico: " + topic);
     }
 
     @Override
     public void connectionLost(Throwable cause) {
-        System.err.println("⚠ Conexão MQTT perdida: " + cause.getMessage());
+        System.err.println("Conexão MQTT perdida: " + cause.getMessage());
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
         String message = new String(mqttMessage.getPayload());
-        System.out.println("📥 Mensagem recebida [" + topic + "]: " + message);
+        System.out.println("Mensagem recebida [" + topic + "]: " + message);
 
-        String macAddress = topic.substring(topic.lastIndexOf('/') + 1);
+        String ipAdress = topic.substring(topic.lastIndexOf('/') + 1);
 
-        // ---------- TRATAMENTO DE PONG ----------
         if ("PONG".equalsIgnoreCase(message.trim())) {
-            handlePong(macAddress);
+            handlePong(ipAdress);
             return;
         }
 
-        // ---------- TRATAMENTO DE TELEMETRIA ----------
         if (topic.startsWith("leakwatch/sensor/")) {
-            handleSensorData(macAddress, message);
+            handleSensorData(ipAdress, message);
         }
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {}
 
-    // ============================================================
-    // TRATAMENTO DE PONG
-    // ============================================================
-    private void handlePong(String macAddress) {
-        Optional<Sensor> sensorOpt = sensorRepository.findById(macAddress);
+    private void handlePong(String ipAdress) {
+        Optional<Sensor> sensorOpt = sensorRepository.findById(ipAdress);
 
         if (sensorOpt.isPresent()) {
             Sensor sensor = sensorOpt.get();
@@ -116,25 +111,20 @@ public class MqttToPostgres implements MqttCallback {
 
             sensorRepository.save(sensor);
 
-            System.out.println("📡 PONG recebido de " + macAddress + " → marcado como CONECTADO");
+            System.out.println("PONG recebido de " + ipAdress + " → marcado como CONECTADO");
         } else {
-            System.out.println("⚠ PONG de MAC desconhecido: " + macAddress);
+            System.out.println("PONG de IP desconhecido: " + ipAdress);
         }
     }
 
-    // ============================================================
-    // TRATAMENTO DE TELEMETRIA DO SENSOR
-    // ============================================================
-    private void handleSensorData(String macAddress, String jsonMessage) {
+    private void handleSensorData(String ipAdress, String jsonMessage) {
         try {
-            // Parsing manual simples (por performance)
             double gasLevel = extrairDouble(jsonMessage, "\"valor\":");
             String status = extrairString(jsonMessage, "\"status\":\"");
 
-            salvarRelatorio(macAddress, gasLevel, status);
+            salvarRelatorio(ipAdress, gasLevel, status);
 
-            // Atualiza informações do sensor
-            Optional<Sensor> opt = sensorRepository.findById(macAddress);
+            Optional<Sensor> opt = sensorRepository.findById(ipAdress);
             if (opt.isPresent()) {
                 Sensor sensor = opt.get();
 
@@ -150,9 +140,6 @@ public class MqttToPostgres implements MqttCallback {
         }
     }
 
-    // ============================================================
-    // EXTRAÇÃO DOS CAMPOS DO JSON
-    // ============================================================
     private double extrairDouble(String json, String key) {
         int start = json.indexOf(key);
         if (start == -1) return 0;
@@ -169,32 +156,26 @@ public class MqttToPostgres implements MqttCallback {
         return json.substring(start + key.length(), end);
     }
 
-    // ============================================================
-    // SALVAR RELATÓRIO NO BANCO POSTGRES
-    // ============================================================
-    private void salvarRelatorio(String macAddress, double gasLevel, String status) {
-        String sql = "INSERT INTO report (gas_level, mac_address, report_time, status) VALUES (?, ?, ?, ?)";
+    private void salvarRelatorio(String ipAdress, double gasLevel, String status) {
+        String sql = "INSERT INTO report (gas_level, ipAdress, report_time, status) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setDouble(1, gasLevel);
-            stmt.setString(2, macAddress);
+            stmt.setString(2, ipAdress);
             stmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setString(4, status);
 
             stmt.executeUpdate();
 
-            System.out.println("Telemetria salva (MAC: " + macAddress + ", Nível: " + gasLevel + ")");
+            System.out.println("Telemetria salva (IP: " + ipAdress + ", Nível: " + gasLevel + ")");
 
         } catch (SQLException e) {
             System.err.println("Erro ao salvar no banco: " + e.getMessage());
         }
     }
 
-    // ============================================================
-    // HEARTBEAT AUTOMÁTICO
-    // ============================================================
     @Scheduled(fixedRate = 15000)
     public void verificarSensores() {
         LocalDateTime limite = LocalDateTime.now().minusSeconds(30);
@@ -204,7 +185,7 @@ public class MqttToPostgres implements MqttCallback {
                 if (Boolean.TRUE.equals(sensor.getIsConnected())) {
                     sensor.setIsConnected(false);
                     sensorRepository.save(sensor);
-                    System.out.println("❌ Sensor OFFLINE: " + sensor.getMacAddress());
+                    System.out.println("Sensor OFFLINE: " + sensor.getIpAdress());
                 }
             }
         });
