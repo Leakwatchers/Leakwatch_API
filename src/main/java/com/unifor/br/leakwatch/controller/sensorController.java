@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/sensors")
+@RequestMapping("/api/sensores" )
+@CrossOrigin(origins = "*") // <--- CORREÇÃO APLICADA AQUI
 public class SensorController {
 
     @Autowired
@@ -22,84 +23,61 @@ public class SensorController {
     @Autowired
     private MqttToPostgres mqttService;
 
-    // DTO para entrada
+    // DTO simplificado para o cadastro (agora inclui sensorType)
     public static class CadastroSensorDTO {
-        public String macAddress;
         public String sensorName;
+        public String macAddress;
         public String sensorType;
-        public boolean isConnected;
     }
 
-    // MASTER → cria sensor
+    /**
+     * Endpoint para cadastrar um novo sensor. Apenas usuários com a role SUPER podem acessar.
+     */
     @PostMapping
-    @PreAuthorize("hasRole('MASTER')")
-    public ResponseEntity<Sensor> create(@RequestBody CadastroSensorDTO dto) {
-
+    @PreAuthorize("hasRole('SUPER')")
+    public ResponseEntity<Sensor> cadastrarSensor(@RequestBody CadastroSensorDTO dto) {
         if (sensorRepository.findById(dto.macAddress).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return new ResponseEntity<>(HttpStatus.CONFLICT); // Sensor já existe
         }
 
-        Sensor s = new Sensor();
-        s.setMacAddress(dto.macAddress);
-        s.setSensorName(dto.sensorName);
-        s.setSensorType(dto.sensorType);
-        s.setIsConnected(dto.isConnected);
+        Sensor novoSensor = new Sensor();
+        novoSensor.setMacAddress(dto.macAddress);
+        novoSensor.setSensorName(dto.sensorName);
+        novoSensor.setSensorType(dto.sensorType);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(sensorRepository.save(s));
+        Sensor salvo = sensorRepository.save(novoSensor);
+        return new ResponseEntity<>(salvo, HttpStatus.CREATED);
     }
 
-    // VIEW + MASTER → listar sensores
-    @GetMapping
-    @PreAuthorize("hasAnyRole('VIEW','MASTER')")
-    public ResponseEntity<List<Sensor>> list() {
-        return ResponseEntity.ok(sensorRepository.findAll());
+    /**
+     * Endpoint para listar todos os sensores. Apenas usuários com a role MIDDLE ou SUPER podem acessar.
+     */
+    @GetMapping("/listar")
+    @PreAuthorize("hasAnyRole('MIDDLE', 'SUPER')")
+    public ResponseEntity<List<Sensor>> listarSensores() {
+        List<Sensor> sensores = sensorRepository.findAll();
+        return new ResponseEntity<>(sensores, HttpStatus.OK);
     }
 
-    // MASTER → editar sensor
-    @PutMapping("/{mac}")
-    @PreAuthorize("hasRole('MASTER')")
-    public ResponseEntity<Sensor> update(@PathVariable String mac, @RequestBody CadastroSensorDTO dto) {
-
-        Optional<Sensor> opt = sensorRepository.findById(mac);
-        if (opt.isEmpty()) return ResponseEntity.notFound().build();
-
-        Sensor s = opt.get();
-        s.setSensorName(dto.sensorName);
-        s.setSensorType(dto.sensorType);
-        s.setIsConnected(dto.isConnected);
-
-        return ResponseEntity.ok(sensorRepository.save(s));
-    }
-
-    // MASTER → remover sensor
-    @DeleteMapping("/{mac}")
-    @PreAuthorize("hasRole('MASTER')")
-    public ResponseEntity<Void> delete(@PathVariable String mac) {
-        if (!sensorRepository.existsById(mac)) {
-            return ResponseEntity.notFound().build();
-        }
-        sensorRepository.deleteById(mac);
-        return ResponseEntity.noContent().build();
-    }
-
-    // VIEW + MASTER → enviar comando PING
-    @PostMapping("/{mac}/ping")
-    @PreAuthorize("hasAnyRole('VIEW','MASTER')")
-    public ResponseEntity<String> ping(@PathVariable String mac) {
-
-        Optional<Sensor> opt = sensorRepository.findById(mac);
-        if (opt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Sensor não encontrado");
+    /**
+     * NOVO ENDPOINT: Envia o comando PING para um sensor específico via MQTT.
+     * O frontend chamará este endpoint.
+     */
+    @PostMapping("/{macAddress}/ping")
+    @PreAuthorize("hasAnyRole('MIDDLE', 'SUPER')")
+    public ResponseEntity<String> pingSensor(@PathVariable String macAddress) {
+        Optional<Sensor> sensorOpt = sensorRepository.findById(macAddress);
+        if (sensorOpt.isEmpty()) {
+            return new ResponseEntity<>("Sensor não encontrado", HttpStatus.NOT_FOUND);
         }
 
         try {
-            mqttService.sendCommand(mac, "PING");
+            mqttService.sendCommand(macAddress, "PING");
 
-            return ResponseEntity.ok("PING enviado para " + mac + ". Aguardando PONG...");
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao enviar comando MQTT: " + ex.getMessage());
+            return new ResponseEntity<>("Comando PING enviado para " + macAddress + ". Aguardando PONG...", HttpStatus.OK);
+        } catch (Exception e) {
+            System.err.println("Falha ao enviar comando MQTT para " + macAddress + ": " + e.getMessage());
+            return new ResponseEntity<>("Falha ao enviar comando MQTT: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

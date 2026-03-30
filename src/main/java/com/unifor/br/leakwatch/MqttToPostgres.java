@@ -2,6 +2,7 @@ package com.unifor.br.leakwatch;
 
 import com.unifor.br.leakwatch.model.Sensor;
 import com.unifor.br.leakwatch.repository.SensorRepository;
+import com.unifor.br.leakwatch.services.WhatsAppAlertService;
 import jakarta.annotation.PostConstruct;
 import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class MqttToPostgres implements MqttCallback {
 
     @Autowired
     private SensorRepository sensorRepository;
+
+    @Autowired
+    private WhatsAppAlertService whatsAppAlertService;
 
     // ==== CONFIGURAÇÕES DO BROKER HIVEMQ CLOUD ====
     private static final String MQTT_BROKER = "ssl://2d6a2b6382f6430cb4e1f780cfa73926.s1.eu.hivemq.cloud:8883";
@@ -132,6 +136,9 @@ public class MqttToPostgres implements MqttCallback {
             String status = extrairString(jsonMessage, "\"status\":\"");
 
             salvarRelatorio(macAddress, gasLevel, status);
+
+            // ✅ ALERTA WHATSAPP: dispara mensagem se nível crítico
+            whatsAppAlertService.verificarEAlertar(gasLevel, macAddress, status);
 
             // Atualiza informações do sensor
             Optional<Sensor> opt = sensorRepository.findById(macAddress);
