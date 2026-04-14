@@ -17,7 +17,7 @@ public class ReportController {
     public record ReportResp(
             Long id,
             Double gasLevel,
-            String macAddress,
+            String sensorIp,
             String sensorName,
             LocalDateTime reportTime,
             String status
@@ -36,14 +36,14 @@ public class ReportController {
     public List<ReportResp> listarTodos() {
         return repo.findAll().stream().map(r -> {
 
-            String name = sensorRepo.findById(r.getMacAddress())
+            String name = sensorRepo.findById(r.getSensorIp())
                     .map(Sensor::getSensorName)
                     .orElse("Desconhecido");
 
             return new ReportResp(
                     r.getId(),
                     r.getGasLevel(),
-                    r.getMacAddress(),
+                    r.getSensorIp(),
                     name,
                     r.getReportTime(),
                     r.getStatus()
@@ -51,14 +51,14 @@ public class ReportController {
         }).toList();
     }
 
-    @GetMapping("/sensor/{mac}")
-    public List<Report> porSensor(@PathVariable String mac) {
-        return repo.findByMacAddressOrderByReportTimeDesc(mac);
+    @GetMapping("/sensor/{sensorIp}")
+    public List<Report> porSensor(@PathVariable String sensorIp) {
+        return repo.findBySensorIpOrderByReportTimeDesc(sensorIp);
     }
 
-    @GetMapping("/ultimo/{mac}")
-    public Report ultimo(@PathVariable String mac) {
-        return repo.findUltimoByMacAddress(mac);
+    @GetMapping("/ultimo/{sensorIp}")
+    public Report ultimo(@PathVariable String sensorIp) {
+        return repo.findUltimoBySensorIp(sensorIp).get(0);
     }
 
     @GetMapping("/alertas")

@@ -157,7 +157,7 @@ public class MqttToPostgres implements MqttCallback {
     }
 
     private void salvarRelatorio(String ipAdress, double gasLevel, String status) {
-        String sql = "INSERT INTO report (gas_level, ipAdress, report_time, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO report (gas_level, sensor_ip, report_time, status) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement stmt = conn.prepareStatement(sql)) {

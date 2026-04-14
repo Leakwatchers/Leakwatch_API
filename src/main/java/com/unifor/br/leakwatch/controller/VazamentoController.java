@@ -27,10 +27,8 @@ public class VazamentoController {
         List<Integer> quantidades = new ArrayList<>();
 
         for (Sensor s : sensores) {
-            // CORREÇÃO: Usar getMacAddress() em vez de getId()
-            var reports = reportRepository.findByMacAddressOrderByReportTimeAsc(s.getMacAddress());
+            var reports = reportRepository.findBySensorIpOrderByReportTimeAsc(s.getIpAdress());
 
-            // Assumindo que o Report.java tem o método getGasLevel()
             int qtd = (int) reports.stream()
                     .filter(r -> r.getGasLevel() > 80.0)
                     .count();
