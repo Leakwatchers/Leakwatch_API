@@ -9,4 +9,6 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
 
     Optional<Sensor> findByIpAdress(String ipAdress);
 
+
+
 }

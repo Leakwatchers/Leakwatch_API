@@ -118,7 +118,6 @@ public class MqttToPostgres implements MqttCallback {
 
             Sensor sensor = opt.get();
 
-            // 🔥 salva com relacionamento correto
             Report report = new Report();
             report.setGasLevel(gasLevel);
             report.setStatus(status);
@@ -128,7 +127,6 @@ public class MqttToPostgres implements MqttCallback {
 
             reportRepository.save(report);
 
-            // atualiza sensor
             sensor.setLastSeen(LocalDateTime.now());
             sensor.setIsConnected(true);
             sensorRepository.save(sensor);
