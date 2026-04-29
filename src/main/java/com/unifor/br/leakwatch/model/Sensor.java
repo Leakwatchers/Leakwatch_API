@@ -1,28 +1,32 @@
 package com.unifor.br.leakwatch.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
+@Data
 @Entity
 @Table(name = "sensor")
-@Data
 public class Sensor {
 
     @Id
-    @Column(name = "mac_address") // Mapeia para a coluna mac_address (VARCHAR(17) PRIMARY KEY)
-    private String macAddress;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "sensor_name") // Mapeia para a coluna sensor_name
+    @Column(name = "ip_adress")
+    private String ipAdress;
+
+    @Column(name = "sensor_name")
     private String sensorName;
 
-    @Column(name = "sensor_type") // Mapeia para a coluna sensor_type
+    @Column(name = "sensor_type")
     private String sensorType;
 
-    @Column(name = "is_connected") // Mapeia para a nova coluna is_connected
-    private Boolean isConnected = false;
+    @Column(name = "is_connected")
+    private Boolean isConnected;
 
-    // Construtores, getters e setters (gerados pelo Lombok @Data)
+    @Column(name = "last_seen")
+    private LocalDateTime lastSeen;
+
 }

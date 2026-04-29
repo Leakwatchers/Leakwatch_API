@@ -2,9 +2,9 @@ package com.unifor.br.leakwatch.controller;
 
 import com.unifor.br.leakwatch.model.Sensor;
 import com.unifor.br.leakwatch.repository.ReportRepository;
-import com.unifor.br.leakwatch.repository.UserRepository;
 import com.unifor.br.leakwatch.repository.SensorRepository;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.*;
 
 @RestController
@@ -22,16 +22,20 @@ public class VazamentoController {
 
     @GetMapping
     public Map<String, Object> getVazamentos() {
+
         List<Sensor> sensores = sensorRepository.findAll();
         List<String> nomes = new ArrayList<>();
         List<Integer> quantidades = new ArrayList<>();
 
         for (Sensor s : sensores) {
-            var reports = reportRepository.findBySensorIpOrderByReportTimeAsc(s.getIpAdress());
+
+            var reports = reportRepository
+                    .findBySensorIdOrderByReportTimeAsc(s.getId());
 
             int qtd = (int) reports.stream()
-                    .filter(r -> r.getGasLevel() > 80.0)
+                    .filter(r -> r.getGasLevel() != null && r.getGasLevel() > 80.0)
                     .count();
+
             nomes.add(s.getSensorName());
             quantidades.add(qtd);
         }

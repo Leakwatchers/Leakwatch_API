@@ -19,24 +19,22 @@ public class UserService {
         this.encoder = encoder;
     }
 
-    // Criar usuário (MASTER)
-    public User createUser(String username, String rawPassword, Role role) {
+    public User createUser(String username, String rawPassword, Role role, String telefone) { // <-- ALTERADO
 
         User u = new User();
         u.setUsername(username);
-        u.setPasswordHash(encoder.encode(rawPassword));  // <-- SENHA CORRETA!
+        u.setPasswordHash(encoder.encode(rawPassword));
         u.setRole(role);
         u.setActive(true);
+        u.setTelefone(telefone); // <-- ADICIONADO
 
         return repo.save(u);
     }
 
-    // Listar todos (MASTER)
     public List<User> listAll() {
         return repo.findAll();
     }
 
-    // Remover usuário (MASTER)
     public void delete(Long id) {
         repo.deleteById(id);
     }

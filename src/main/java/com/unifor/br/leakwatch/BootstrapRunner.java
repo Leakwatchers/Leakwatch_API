@@ -17,7 +17,7 @@ public class BootstrapRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (userService.listAll().isEmpty()) {
-            userService.createUser("admin", "admin123", Role.ROLE_MASTER);
+            userService.createUser("admin", "admin123", Role.ROLE_MASTER, "85999999999"); // <-- ALTERADO
             System.out.println(" Usuário ADMIN criado:");
             System.out.println("   usuário: admin");
             System.out.println("   senha: admin123");

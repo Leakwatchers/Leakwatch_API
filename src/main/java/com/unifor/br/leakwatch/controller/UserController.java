@@ -19,24 +19,22 @@ public class UserController {
         this.svc = svc;
     }
 
-    public static record CreateUserReq(String username, String password, String role) {}
+    // ALTERADO (adicionei telefone)
+    public static record CreateUserReq(String username, String password, String role, String telefone) {}
 
-    // MASTER cria usuário
     @PostMapping
     @PreAuthorize("hasRole('MASTER')")
     public User createUser(@RequestBody CreateUserReq req) {
-        Role role = Role.valueOf("ROLE_" + req.role().toUpperCase());  // MASTER / VIEW
-        return svc.createUser(req.username(), req.password(), role);
+        Role role = Role.valueOf("ROLE_" + req.role().toUpperCase());
+        return svc.createUser(req.username(), req.password(), role, req.telefone()); // <-- CORRIGIDO
     }
 
-    // MASTER lista usuários
     @GetMapping
     @PreAuthorize("hasRole('MASTER')")
     public List<User> listUsers() {
         return svc.listAll();
     }
 
-    // MASTER remove
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MASTER')")
     public void deleteUser(@PathVariable Long id) {

@@ -5,5 +5,6 @@ public record UsuarioViewDTO(
         Long id,
         String nome,
         String email,
-        String role
+        String role,
+        String telefone
 ) {}

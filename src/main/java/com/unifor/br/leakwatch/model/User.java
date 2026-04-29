@@ -23,4 +23,7 @@ public class User {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name="telefone")
+    private String telefone;
 }
