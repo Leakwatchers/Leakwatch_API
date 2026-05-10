@@ -54,6 +54,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//Twilio
+	implementation 'com.twilio.sdk:twilio:10.1.0'
 }
 
 tasks.named('test') {

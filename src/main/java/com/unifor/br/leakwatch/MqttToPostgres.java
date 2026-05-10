@@ -9,7 +9,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
+import com.unifor.br.leakwatch.services.MessageService;
 import javax.net.ssl.SSLSocketFactory;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -22,6 +22,9 @@ public class MqttToPostgres implements MqttCallback {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private MessageService messageService;
 
     private static final String MQTT_BROKER = "ssl://2d6a2b6382f6430cb4e1f780cfa73926.s1.eu.hivemq.cloud:8883";
     private static final String MQTT_STATUS_TOPIC = "leakwatch/sensor/#";
@@ -117,6 +120,13 @@ public class MqttToPostgres implements MqttCallback {
             }
 
             Sensor sensor = opt.get();
+
+            messageService.verificarEAlertar(
+                    gasLevel,
+                    sensor.getIpAdress(),
+                    status,
+                    sensor.getSensorName()
+            );
 
             Report report = new Report();
             report.setGasLevel(gasLevel);

@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/sensor/**").permitAll()
                         .requestMatchers("/api/sensor/**").permitAll()
+                        .requestMatchers("/teste/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authProvider());
